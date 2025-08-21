@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
+import { signIn } from "next-auth/react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -47,6 +48,13 @@ export default function LoginPage() {
     router.push("/dashboard");
   };
 
+  const handleLineLogin = async () => {
+    const res = await signIn("line", {
+      callbackUrl: "/dashboard",
+    });
+    console.log("Line login response:", res);
+  };
+
   return (
     <>
       <Card className="w-full max-w-sm">
@@ -55,7 +63,11 @@ export default function LoginPage() {
           <CardDescription>Login to your supportMe Account</CardDescription>
         </CardHeader>
         <CardContent>
-          <FormLogin form={form} handleSubmit={handleSubmit} />
+          <FormLogin
+            form={form}
+            handleSubmit={handleSubmit}
+            handleLineLogin={handleLineLogin}
+          />
         </CardContent>
         <CardFooter className="justify-between">
           <small>Don&apos;t have an account</small>
@@ -71,9 +83,10 @@ export default function LoginPage() {
 type Props = {
   form: UseFormReturn<{ email: string; password: string }, undefined>;
   handleSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
+  handleLineLogin: () => Promise<void>;
 };
 
-const FormLogin = ({ form, handleSubmit }: Props) => {
+const FormLogin = ({ form, handleSubmit, handleLineLogin }: Props) => {
   return (
     <Form {...form}>
       <form
@@ -110,6 +123,9 @@ const FormLogin = ({ form, handleSubmit }: Props) => {
           )}
         />
         <Button type="submit">Login</Button>
+        <Button type="button" onClick={handleLineLogin} variant="outline">
+          Line
+        </Button>
       </form>
     </Form>
   );
