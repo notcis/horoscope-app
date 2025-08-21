@@ -54,6 +54,12 @@ export default function LoginPage() {
     });
     console.log("Line login response:", res);
   };
+  const handleFacebookLogin = async () => {
+    const res = await signIn("facebook", {
+      callbackUrl: "/dashboard",
+    });
+    console.log("Facebook login response:", res);
+  };
 
   return (
     <>
@@ -67,6 +73,7 @@ export default function LoginPage() {
             form={form}
             handleSubmit={handleSubmit}
             handleLineLogin={handleLineLogin}
+            handleFacebookLogin={handleFacebookLogin}
           />
         </CardContent>
         <CardFooter className="justify-between">
@@ -84,9 +91,15 @@ type Props = {
   form: UseFormReturn<{ email: string; password: string }, undefined>;
   handleSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
   handleLineLogin: () => Promise<void>;
+  handleFacebookLogin: () => Promise<void>;
 };
 
-const FormLogin = ({ form, handleSubmit, handleLineLogin }: Props) => {
+const FormLogin = ({
+  form,
+  handleSubmit,
+  handleLineLogin,
+  handleFacebookLogin,
+}: Props) => {
   return (
     <Form {...form}>
       <form
@@ -125,6 +138,9 @@ const FormLogin = ({ form, handleSubmit, handleLineLogin }: Props) => {
         <Button type="submit">Login</Button>
         <Button type="button" onClick={handleLineLogin} variant="outline">
           Line
+        </Button>
+        <Button type="button" onClick={handleFacebookLogin} variant="outline">
+          Facebook
         </Button>
       </form>
     </Form>
