@@ -20,6 +20,7 @@ model User {
   picture    String?
   email      String?   @unique
   password   String?
+  dob        DateTime?
   role       String    @default("user")
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt

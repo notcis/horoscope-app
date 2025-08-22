@@ -54,7 +54,23 @@ export const generateHoroscope = async ({
 
   const content = response.choices[0].message.content;
 
-  console.log(content);
+  let parsed;
+  try {
+    const jsonStr = extractJson(content);
+    parsed = JSON.parse(jsonStr);
+    return parsed;
+  } catch (err) {
+    console.error("Failed to parse JSON from model:", err);
+    console.log("raw content:", content);
+    return;
+  }
+};
+
+// helper: strip triple-backticks และ parse JSON
+const extractJson = (text: string | null) => {
+  const trimmed = text?.trim() ?? "";
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return (fenced ? fenced[1] : trimmed).trim();
 };
 
 generateHoroscope({
