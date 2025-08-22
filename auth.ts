@@ -16,16 +16,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     signIn: async ({ user, account, profile }) => {
-      const existingUser = await prisma.account.findFirst({
+      const existingAccount = await prisma.account.findFirst({
         where: {
-          id: user.id as string,
+          providerAccountId: account?.providerAccountId,
         },
       });
 
-      if (!existingUser) {
+      if (!existingAccount) {
         const newUser = await prisma.user.create({
           data: {
-            id: user.id as string,
             name: user.name || profile?.name,
             picture: user.image || profile?.picture,
             email: user.email,
@@ -41,6 +40,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         user.id = newUser.id;
+      } else {
+        user.id = existingAccount.userId;
       }
 
       return true;
@@ -52,6 +53,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: {
             id: user.id,
           },
+          include: {
+            Account: {
+              select: {
+                providerAccountId: true,
+                provider: true,
+              },
+            },
+          },
         });
         if (dbUser) {
           token.id = dbUser.id;
@@ -59,6 +68,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.picture = dbUser.picture;
           token.name = dbUser.name;
           token.role = dbUser.role;
+          token.providerAccountId = dbUser.Account.at(0)?.providerAccountId;
+          token.provider = dbUser.Account.at(0)?.provider;
         }
       }
 
@@ -72,6 +83,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.picture = token.picture;
         session.user.name = token.name;
         session.user.role = token.role;
+        session.user.providerAccountId = token.providerAccountId;
+        session.user.provider = token.provider;
       }
 
       return session;

@@ -1,11 +1,16 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import MenuItem from "./menu-item";
 import MenuTitle from "./menu-title";
-import Link from "next/link";
 import LightDarkToggle from "@/components/ui/light-dark-toggle";
 import { cn } from "@/lib/utils";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 export default function MainMenu({ className }: { className?: string }) {
+  const handleLogout = () => {
+    signOut();
+  };
+
   return (
     <nav
       className={cn("md:bg-muted overflow-auto p-4 flex flex-col", className)}
@@ -26,9 +31,9 @@ export default function MainMenu({ className }: { className?: string }) {
             NC
           </AvatarFallback>
         </Avatar>
-        <Link href="/" className=" hover:underline">
+        <Button variant="link" onClick={handleLogout}>
           Logout
-        </Link>
+        </Button>
         <LightDarkToggle className="ml-auto" />
       </footer>
     </nav>
