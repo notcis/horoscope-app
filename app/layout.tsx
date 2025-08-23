@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
+import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(poppins.className, "dark")}>
         <SessionProvider>{children}</SessionProvider>
+        <Toaster richColors />
       </body>
     </html>
   );

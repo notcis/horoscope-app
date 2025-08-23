@@ -37,10 +37,16 @@ export async function createHoroscope(dob: Date) {
     });
 
     if (checkHoroscope?.id) {
-      return {
-        success: false,
-        message: "Horoscope already exists for this month",
-      };
+      const existingHoroscope = await prisma.horoscope.findUnique({
+        where: {
+          id: checkHoroscope.id,
+        },
+      });
+
+      return{
+        success: true,
+        data: existingHoroscope,
+      }
     }
 
     const birthday = formatDateTH(dob);

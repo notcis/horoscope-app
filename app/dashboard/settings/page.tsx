@@ -1,3 +1,3 @@
 export default function page() {
-  return <div>page</div>;
+  return <div className="mx-auto max-w-2xl space-y-6"></div>;
 }
