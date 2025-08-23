@@ -35,3 +35,22 @@ model Account {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Horoscope {
+  id               String   @id @default(uuid())
+  userId           String
+  monthKey         String
+  dob              String
+  age              String
+  zodiac           String
+  monthYear        String
+  love             String
+  career           String
+  finance          String
+  luckyColorNameTH String
+  luckyColorHex    String
+  luckyNumber      String
+  createdAt        DateTime @default(now())
+
+  @@unique([userId, monthKey], name: "user_month_key_unique")
+}

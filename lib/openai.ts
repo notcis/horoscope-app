@@ -73,8 +73,9 @@ const extractJson = (text: string | null) => {
   return (fenced ? fenced[1] : trimmed).trim();
 };
 
-generateHoroscope({
+/* generateHoroscope({
   birthday: "08-04-2531",
   zodiacThai: "เมษ",
   monthYearTH: "มกราคม 2568",
 });
+ */

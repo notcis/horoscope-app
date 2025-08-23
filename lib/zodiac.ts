@@ -1,7 +1,12 @@
 // lib/zodiac.ts
+import { getDate, getMonth, intervalToDuration, addMonths } from "date-fns";
+import { toZonedTime, formatInTimeZone } from "date-fns-tz";
+import { th } from "date-fns/locale";
+
 export function getThaiZodiac(date: Date): string {
-  const m = date.getUTCMonth() + 1;
-  const d = date.getUTCDate();
+  const zoned = toZonedTime(date, "Asia/Bangkok");
+  const m = getMonth(zoned) + 1;
+  const d = getDate(zoned);
 
   if ((m === 3 && d >= 21) || (m === 4 && d <= 19)) return "เมษ";
   if ((m === 4 && d >= 20) || (m === 5 && d <= 20)) return "พฤษภ";
@@ -18,9 +23,39 @@ export function getThaiZodiac(date: Date): string {
 }
 
 export function monthYearTHNowBangkok(): string {
-  return new Date().toLocaleDateString("th-TH", {
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Bangkok",
+  return formatInTimeZone(new Date(), "Asia/Bangkok", "MMMM yyyy", {
+    locale: th,
   });
+}
+
+export function formatDateTH(date: Date): string {
+  return formatInTimeZone(date, "Asia/Bangkok", "dd MMMM yyyy", {
+    locale: th,
+  });
+}
+
+export function monthKey(
+  d: Date | string | number = new Date(),
+  tz = "Asia/Bangkok",
+  offsetMonths = 0
+): string {
+  const base = d instanceof Date ? d : new Date(d);
+  const zonedBase = toZonedTime(base, tz);
+  const adjusted = addMonths(zonedBase, offsetMonths);
+  return formatInTimeZone(adjusted, tz, "yyyy-MM");
+}
+
+// เพิ่ม: คืนค่า { years, months } จาก dob (อิง timezone ที่ส่งเข้าไป)
+export function ageYearsMonths(
+  dob: Date,
+  refDate: Date = new Date(),
+  tz = "Asia/Bangkok"
+): string {
+  const start = toZonedTime(dob, tz);
+  const end = toZonedTime(refDate, tz);
+
+  if (end.getTime() < start.getTime()) return "0 ปี 0 เดือน";
+
+  const dur = intervalToDuration({ start, end });
+  return `${dur.years ?? 0} ปี ${dur.months ?? 0} เดือน`;
 }
