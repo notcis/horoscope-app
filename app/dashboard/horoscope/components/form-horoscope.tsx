@@ -1,26 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
 
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -36,33 +17,17 @@ import { Separator } from "@/components/ui/separator";
 import { Horoscope } from "@/lib/generated/prisma";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-
-const formSchema = z.object({
-  birthday: z.date().refine((date) => {
-    const today = new Date();
-    const eighteenYearAgo = new Date(
-      today.getFullYear() - 18,
-      today.getMonth(),
-      today.getDate()
-    );
-    return date <= eighteenYearAgo;
-  }, "You must be at least 18 years old"),
-});
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function FormHoroscope() {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<Horoscope | null | undefined>(null);
+  const { data: session } = useSession();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      birthday: undefined,
-    },
-  });
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleClickHoroscope = async () => {
     startTransition(async () => {
-      const res = await createHoroscope(data.birthday);
+      const res = await createHoroscope();
       if (!res.success) {
         toast.error(res.message || "Something went wrong. Please try again.");
       }
@@ -79,61 +44,31 @@ export default function FormHoroscope() {
         <CardHeader>
           <CardTitle>ดูดวงรายเดือน</CardTitle>
           <CardDescription>
-            เลือกวันเกิด จากนั้นระบบจะสร้างคำทำนาย “เดือนปัจจุบัน” ให้คุณ
+            วันเกิดของคุณ{" "}
+            {session?.user.dob ? (
+              formatDateTH(session.user.dob)
+            ) : (
+              <>
+                <span>ไม่พบวันเกิด </span>
+                <Link
+                  className="text-blue-500 underline"
+                  href="/dashboard/account"
+                >
+                  กรุณาตั้งค่าบัญชี
+                </Link>
+              </>
+            )}{" "}
+            จากนั้นระบบจะสร้างคำทำนาย “เดือนนี้” ให้คุณ
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="birthday"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>วันเดือนปีเกิด</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              formatDateTH(field.value)
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          defaultMonth={field.value}
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          fixedWeeks
-                          weekStartsOn={1}
-                          fromDate={dobFromDate}
-                          toDate={new Date()}
-                          captionLayout="dropdown-buttons"
-                        />
-                      </PopoverContent>
-                    </Popover>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button disabled={isPending} type="submit">
-                {isPending ? "กำลังดูดวง..." : "ดูดวงเดือนนี้"}
-              </Button>
-            </form>
-          </Form>
+          <Button
+            disabled={isPending || !session?.user.dob}
+            type="button"
+            onClick={handleClickHoroscope}
+          >
+            {isPending ? "กำลังดูดวง..." : "ดูดวงเดือนนี้"}
+          </Button>
         </CardContent>
       </Card>
 

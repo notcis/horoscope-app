@@ -12,6 +12,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,49 +24,78 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { updateUser } from "@/lib/actions/users.action";
 import { cn } from "@/lib/utils";
-import { formatDateTH } from "@/lib/zodiac";
+import { changeTimezoneToThai, formatDateTH } from "@/lib/zodiac";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
-import { useTransition } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 const formSchema = z.object({
-  birthday: z
-    .date()
-    .refine((date) => {
-      const today = new Date();
-      const eighteenYearAgo = new Date(
-        today.getFullYear() - 18,
-        today.getMonth(),
-        today.getDate()
-      );
-      return date <= eighteenYearAgo;
-    }, "You must be at least 18 years old")
-    .optional(),
-  name: z.string().optional(),
+  birthday: z.date().refine((date) => {
+    const today = new Date();
+    const eighteenYearAgo = new Date(
+      today.getFullYear() - 18,
+      today.getMonth(),
+      today.getDate()
+    );
+    return date <= eighteenYearAgo;
+  }, "You must be at least 18 years old"),
+
+  name: z.string().min(2, "Name must be at least 2 characters").max(50),
 });
 
-export default function FormAccount({
-  initialValues,
-}: {
-  initialValues: { dob?: Date | null; name?: string | null };
-}) {
+export default function FormAccount() {
+  const { data: session, update } = useSession();
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      birthday: initialValues?.dob || undefined,
-      name: initialValues?.name || undefined,
+      birthday: session?.user?.dob ? new Date(session.user.dob) : undefined,
+      name: session?.user?.name || "",
     },
   });
 
+  useEffect(() => {
+    if (session) {
+      form.reset({
+        birthday: session.user.dob ? new Date(session.user.dob) : undefined,
+        name: session.user.name || "",
+      });
+    }
+  }, [session, form]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    startTransition(() => {
-      form.reset();
-      console.log(values);
+    startTransition(async () => {
+      const res = await updateUser({
+        dob: changeTimezoneToThai(values.birthday),
+        name: values.name,
+      });
+      if (!res.success) {
+        toast.error(res.message);
+        return;
+      }
+
+      if (res.data) {
+        const updatedSession = {
+          ...session,
+          user: {
+            ...session?.user,
+            dob: res.data.dob,
+            name: res.data.name,
+          },
+        };
+        await update(updatedSession);
+        toast.success("บันทึกข้อมูลสำเร็จ");
+        router.push("/dashboard/horoscope");
+      }
     });
   };
 
@@ -75,7 +105,7 @@ export default function FormAccount({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>คั้งค่าบัญชี</CardTitle>
+        <CardTitle>ตั้งค่าบัญชี</CardTitle>
         <CardDescription>ปรับแต่งการตั้งค่าบัญชีของคุณ</CardDescription>
       </CardHeader>
       <CardContent>
@@ -122,6 +152,9 @@ export default function FormAccount({
                   </Popover>
 
                   <FormMessage />
+                  <FormDescription>
+                    กรุณาเลือกวันเกิดจริงของคุณ เพื่อความถูกต้องในการดูดวง
+                  </FormDescription>
                 </FormItem>
               )}
             />
@@ -131,7 +164,7 @@ export default function FormAccount({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>ชื่อ</FormLabel>
-                  <FormControl>
+                  <FormControl className="w-min">
                     <Input placeholder="กรุณากรอกชื่อ" {...field} />
                   </FormControl>
                   <FormMessage />

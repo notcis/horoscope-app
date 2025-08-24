@@ -11,10 +11,10 @@ import {
 } from "../zodiac";
 import { generateHoroscope } from "../openai";
 
-export async function createHoroscope(dob: Date) {
+export async function createHoroscope() {
   const session = await auth();
 
-  if (!session?.user.id) {
+  if (!session?.user.id || !session?.user.dob) {
     return {
       success: false,
       message: "Unauthorized",
@@ -43,11 +43,13 @@ export async function createHoroscope(dob: Date) {
         },
       });
 
-      return{
+      return {
         success: true,
         data: existingHoroscope,
-      }
+      };
     }
+
+    const dob = session.user.dob;
 
     const birthday = formatDateTH(dob);
     const zodiacThai = getThaiZodiac(dob);
@@ -89,3 +91,54 @@ export async function createHoroscope(dob: Date) {
     };
   }
 }
+
+export const getHoroscopesByUser = async () => {
+  const session = await auth();
+
+  if (!session?.user.id) {
+    return {
+      success: false,
+      message: "Unauthorized",
+    };
+  }
+
+  const horoscopes = await prisma.horoscope.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
+  return {
+    success: true,
+    data: horoscopes,
+  };
+};
+
+export const getHoroscopeById = async (id: string) => {
+  const session = await auth();
+
+  if (!session?.user.id) {
+    return {
+      success: false,
+      message: "Unauthorized",
+    };
+  }
+
+  const horoscope = await prisma.horoscope.findFirst({
+    where: {
+      id,
+    },
+  });
+
+  if (!horoscope) {
+    return {
+      success: false,
+      message: "Horoscope not found",
+    };
+  }
+
+  return {
+    success: true,
+    data: horoscope,
+  };
+};

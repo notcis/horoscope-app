@@ -47,7 +47,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, trigger, session }: any) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: {
@@ -72,6 +72,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.providerAccountId = dbUser.Account.at(0)?.providerAccountId;
           token.provider = dbUser.Account.at(0)?.provider;
         }
+      }
+
+      if (trigger === "update") {
+        token.name = session?.user?.name;
+        token.dob = session?.user?.dob;
       }
 
       return token;

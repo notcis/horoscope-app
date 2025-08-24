@@ -59,3 +59,7 @@ export function ageYearsMonths(
   const dur = intervalToDuration({ start, end });
   return `${dur.years ?? 0} ปี ${dur.months ?? 0} เดือน`;
 }
+
+export function changeTimezoneToThai(date: Date, tz = "Asia/Bangkok"): Date {
+  return new Date(formatInTimeZone(date, tz, "yyyy-MM-dd"));
+}
