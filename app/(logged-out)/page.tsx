@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 import { PersonStandingIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -7,17 +8,17 @@ export default function page() {
     <>
       <h1 className="flex gap-2 items-center">
         <PersonStandingIcon size={50} className=" text-pink-500" />
-        Support Me
+        {APP_NAME}
       </h1>
-      <p>The best dashboard to manage customer support</p>
+      <p>{APP_DESCRIPTION}</p>
       <div className="flex gap-2 items-center">
         <Button asChild>
-          <Link href="/login">Log In</Link>
+          <Link href="/login">เข้าสู่ระบบ</Link>
         </Button>
-        <small>or</small>
-        <Button variant="outline" asChild>
+        {/*  <small>or</small> */}
+        {/* <Button variant="outline" asChild>
           <Link href="/sign-up">Sign Up</Link>
-        </Button>
+        </Button> */}
       </div>
     </>
   );

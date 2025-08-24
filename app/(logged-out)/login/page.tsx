@@ -8,10 +8,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { APP_NAME } from "@/lib/constants";
+import { useRouter } from "next/navigation";
+import Loader from "@/components/ui/loader";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <Loader />;
+  }
+
+  if (session) {
+    router.push("/dashboard/horoscope");
+  }
+
   const handleLineLogin = async () => {
     await signIn("line", {
       callbackUrl: "/dashboard/horoscope",
@@ -25,18 +38,20 @@ export default function LoginPage() {
 
   return (
     <>
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>เข้าสู่ระบบ</CardTitle>
-          <CardDescription>เข้าสู่ระบบเพื่อใช้ {APP_NAME}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FormLogin
-            handleLineLogin={handleLineLogin}
-            handleFacebookLogin={handleFacebookLogin}
-          />
-        </CardContent>
-      </Card>
+      {!session ? (
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>เข้าสู่ระบบ</CardTitle>
+            <CardDescription>เข้าสู่ระบบเพื่อใช้ {APP_NAME}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormLogin
+              handleLineLogin={handleLineLogin}
+              handleFacebookLogin={handleFacebookLogin}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
     </>
   );
 }
