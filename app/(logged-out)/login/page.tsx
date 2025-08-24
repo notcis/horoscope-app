@@ -5,144 +5,75 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { PasswordInput } from "@/components/ui/password-input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { z } from "zod";
 import { signIn } from "next-auth/react";
-
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
+import { APP_NAME } from "@/lib/constants";
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("login validation passed", data);
-    router.push("/dashboard");
-  };
-
   const handleLineLogin = async () => {
-    const res = await signIn("line", {
-      callbackUrl: "/dashboard",
+    await signIn("line", {
+      callbackUrl: "/dashboard/horoscope",
     });
-    console.log("Line login response:", res);
   };
   const handleFacebookLogin = async () => {
-    const res = await signIn("facebook", {
-      callbackUrl: "/dashboard",
+    await signIn("facebook", {
+      callbackUrl: "/dashboard/horoscope",
     });
-    console.log("Facebook login response:", res);
   };
 
   return (
     <>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Login to your supportMe Account</CardDescription>
+          <CardTitle>เข้าสู่ระบบ</CardTitle>
+          <CardDescription>เข้าสู่ระบบเพื่อใช้ {APP_NAME}</CardDescription>
         </CardHeader>
         <CardContent>
           <FormLogin
-            form={form}
-            handleSubmit={handleSubmit}
             handleLineLogin={handleLineLogin}
             handleFacebookLogin={handleFacebookLogin}
           />
         </CardContent>
-        <CardFooter className="justify-between">
-          <small>Don&apos;t have an account</small>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/sign-up">Sign Up</Link>
-          </Button>
-        </CardFooter>
       </Card>
     </>
   );
 }
 
 type Props = {
-  form: UseFormReturn<{ email: string; password: string }, undefined>;
-  handleSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
   handleLineLogin: () => Promise<void>;
   handleFacebookLogin: () => Promise<void>;
 };
 
-const FormLogin = ({
-  form,
-  handleSubmit,
-  handleLineLogin,
-  handleFacebookLogin,
-}: Props) => {
+const FormLogin = ({ handleLineLogin, handleFacebookLogin }: Props) => {
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className=" flex flex-col gap-4"
+    <div className="space-y-4">
+      <Button
+        type="button"
+        onClick={handleLineLogin}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#00C300] hover:bg-[#00A700] text-white shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#00C300]/50"
       >
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="notcis@gmail.com" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the email address you signed up to supportMe with
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <PasswordInput placeholder="********" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Login</Button>
-        <Button type="button" onClick={handleLineLogin} variant="outline">
-          Line
-        </Button>
-        <Button type="button" onClick={handleFacebookLogin} variant="outline">
-          Facebook
-        </Button>
-      </form>
-    </Form>
+        {/* small line chat bubble icon */}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M4 4h16v10H7l-3 3V4z" fill="currentColor" />
+        </svg>
+        เข้าสู่ระบบด้วย LINE
+      </Button>
+      <Button
+        type="button"
+        onClick={handleFacebookLogin}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#1877F2] hover:bg-[#165FC2] text-white shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#1877F2]/50"
+      >
+        {/* small facebook "f" icon */}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M15 3h3v4h-3v14h-4V7H9V3h3V1.8C12 0.8 12.7 0 14.5 0 15.8 0 17 0.4 17.9 1.2L18 1.3V3z"
+            fill="currentColor"
+          />
+        </svg>
+        เข้าสู่ระบบด้วย Facebook
+      </Button>
+    </div>
   );
 };

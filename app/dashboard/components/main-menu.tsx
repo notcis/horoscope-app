@@ -20,7 +20,6 @@ export default function MainMenu({ className }: { className?: string }) {
         <MenuTitle />
       </header>
       <ul className="py-4 grow">
-        <MenuItem href="/dashboard">My dashboard</MenuItem>
         <MenuItem href="/dashboard/horoscope">ดูดวงรายเดือน</MenuItem>
         <MenuItem href="/dashboard/history">ประวัติการดูดวง</MenuItem>
         <MenuItem href="/dashboard/account">บัญชี</MenuItem>
