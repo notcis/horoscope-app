@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getHoroscopeById } from "@/lib/actions/horoscope.action";
-import { cn } from "@/lib/utils";
 
 export default async function page({
   params,
@@ -66,14 +65,16 @@ export default async function page({
           <Separator />
           <section className="flex flex-wrap items-center gap-3">
             <div className="text-sm font-semibold">สีที่ถูกโฉลก</div>
-            <Badge
-              className={cn(
-                "text-base px-3 py-1",
-                `bg-[${horoscope.data?.luckyColorHex}]`
-              )}
-            >
-              {horoscope.data?.luckyColorNameTH ?? "-"}
-            </Badge>
+            <span
+              className="inline-block h-5 w-5 rounded-full border"
+              style={{ backgroundColor: horoscope.data?.luckyColorHex }}
+              aria-label={horoscope.data?.luckyColorNameTH}
+              title={`${horoscope.data?.luckyColorNameTH} ${horoscope.data?.luckyColorHex}`}
+            />
+            <span>
+              {horoscope.data?.luckyColorNameTH} (
+              {horoscope.data?.luckyColorHex})
+            </span>
           </section>
         </CardContent>
       </Card>

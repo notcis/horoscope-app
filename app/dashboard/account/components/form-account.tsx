@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -111,6 +112,10 @@ export default function FormAccount() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={session?.user?.picture} alt="User Avatar" />
+              <AvatarFallback>User</AvatarFallback>
+            </Avatar>
             <FormField
               control={form.control}
               name="birthday"
