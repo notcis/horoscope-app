@@ -29,7 +29,7 @@ export default function DashboardLayout({
         />
       )}
       <div className="overflow-auto py-2 px-4">
-        <h1 className="pb-4 mb-12">Welcome back, {session?.user?.name}!</h1>
+        <h6 className="pb-4 mb-12">Welcome back, {session?.user?.name}!</h6>
         {children}
       </div>
     </div>

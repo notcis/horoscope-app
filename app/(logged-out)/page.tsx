@@ -6,11 +6,11 @@ import Link from "next/link";
 export default function page() {
   return (
     <>
-      <h1 className="flex gap-2 items-center">
+      <h5 className="flex gap-2 items-center">
         <PersonStandingIcon size={50} className=" text-pink-500" />
         {APP_NAME}
-      </h1>
-      <p>{APP_DESCRIPTION}</p>
+      </h5>
+      <p className=" text-sm">{APP_DESCRIPTION}</p>
       <div className="flex gap-2 items-center">
         <Button asChild>
           <Link href="/login">เข้าสู่ระบบ</Link>
