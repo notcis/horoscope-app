@@ -64,6 +64,13 @@ export default function LiffPage() {
         alert("ต้องเปิดในแอป LINE เท่านั้นถึงจะส่งข้อความได้");
         return;
       }
+
+      // ตรวจสอบว่า API ส่งข้อความรองรับบน client นี้หรือไม่
+      if (!liff.isApiAvailable?.("sendMessages")) {
+        alert("ฟีเจอร์ส่งข้อความไม่รองรับบนอุปกรณ์นี้");
+        return;
+      }
+
       await liff.sendMessages([
         {
           type: "text",
@@ -73,7 +80,22 @@ export default function LiffPage() {
       alert("ส่งข้อความเรียบร้อยแล้ว");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      alert(`ส่งข้อความไม่สำเร็จ: ${e?.message ?? e}`);
+      const msg = e?.message ?? String(e);
+
+      // ตรวจสอบข้อผิดพลาดที่เกี่ยวกับสิทธิ์/สโคป
+      if (/permission|scope|not in liff app scope/i.test(msg)) {
+        alert(
+          "ส่งข้อความไม่สำเร็จ: แอป LIFF ยังไม่มีสิทธิ์ส่งข้อความ\n\nแนวทางแก้ไข:\n" +
+            "1) ไปที่ LINE Developers Console → เลือก Channel (Messaging API) → LIFF\n" +
+            "   - ตรวจสอบว่ามีการสร้าง LIFF app และใช้ LIFF ID ตัวเดียวกับที่อยู่ใน NEXT_PUBLIC_LIFF_ID\n" +
+            "2) ตรวจสอบว่า Channel นั้นเปิดใช้งาน Messaging API และเชื่อม LIFF app กับ Channel เดียวกัน\n" +
+            "3) ทดสอบจากแอป LINE (ไม่ใช่ browser) และรีสตาร์ท LIFF ถ้าจำเป็น\n\nข้อผิดพลาดจากระบบ: " +
+            msg
+        );
+        return;
+      }
+
+      alert(`ส่งข้อความไม่สำเร็จ: ${msg}`);
     }
   };
 
